@@ -1,19 +1,58 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import './App.css';
+import axios from 'axios';
+import Character from './components/Character';
 
-const App = () => {
-  // Try to think through what state you'll need for this app before starting. Then build out
-  // the state properties here.
+export default function App()
+{
+    const [characters, setCharacters] = useState(null);
+    const [currentCharacter, setCurrentCharacter] = useState(null);
 
-  // Fetch characters from the API in an effect hook. Remember, anytime you have a 
-  // side effect in a component, you want to think about which state and/or props it should
-  // sync up with, if any.
+    const openDetails = id =>
+    {
+        const character = characters.filter(item => item.id === id);
+        setCurrentCharacter(character);
+    };
 
-  return (
-    <div className="App">
-      <h1 className="Header">Characters</h1>
-    </div>
-  );
+    const closeDetails = () =>
+    {
+        setCurrentCharacter(null);
+    };
+
+    useEffect(() =>
+    {
+
+        axios.get('https://swapi.dev/api/people')
+            .then(response =>
+            {
+                const characters = response.data;
+                let counter = 1;
+                characters.forEach(item => item.counter = counter++);
+                setCharacters(characters);
+            })
+
+            .catch(err =>
+            {
+                console.log(err);
+            });
+    }, []);
+
+
+
+    return (
+        <div className="App">
+            <h1 className="Header">Characters</h1>
+            {
+                characters &&
+                characters.map(fr =>
+                {
+                        return <Character
+                        key={fr.name}
+                        info={fr}
+                        openDetails={openDetails}
+                        closeDetails={closeDetails} />;
+                })
+            }
+        </div>
+    );
 }
-
-export default App;
